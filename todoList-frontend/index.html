@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO App</title>
+    <script type="module" src="/src/main.ts"></script>
+    <style>
+      :root{--accent:#fadc4f;--gap:12px}
+      body{font-family:Inter,system-ui,Arial;margin:0;padding:16px;background:#f6f7fb}
+      #app{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+      #sidebar{background:#fff;padding:30px;border:3px solid #e6e6ef;border-radius:8px}
+      #main{padding:8px}
+      #app-title{margin:0 0 12px 0;font-size:1.25rem}
+      .new-todo-form input,.new-todo-form textarea,select{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px}
+      .field-row{margin-bottom:10px}
+      .field-row.horizontal{display:flex;gap:35px}
+      .field-small{flex:1}
+      #types-list{list-style:none;padding:0;margin:8px 0 0 0}
+      #types-list .type{padding:8px;border-radius:6px;cursor:pointer;color:#444}
+      #types-list .type.current{background:var(--accent);color:#fff}
+      .todo-item{background:#fff;border:1px solid #e6e6ef;padding:12px;margin-bottom:10px;border-radius:8px;display:flex;gap:12px;align-items:flex-start}
+      .todo-main{flex:1}
+      .todo-header{display:flex;justify-content:space-between;align-items:center}
+      .title{font-weight:600}
+      .description{color:#555;margin-top:6px}
+      .due{color:#999;margin-top:6px;font-size:0.9rem}
+      .controls{display:flex;flex-direction:column;gap:8px}
+      .edit-form input,.edit-form textarea,.edit-form select{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px}
+      .edit-row{display:flex;gap:8px}
+      .edit-row .edit-due{flex:1}
+      .edit-row .edit-category{width:140px}
+      .edit-actions{display:flex;gap:8px}
+      button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+    </style>
+    </head>
+  <body>
+
+    <div id="app">
+      <aside id="sidebar">
+        <h1 id="app-title">My TODOs</h1>
+
+        <!-- New todo form (already wired in main.ts) -->
+        <div id="new-todo-area">
+          <form id="new-todo-form" class="new-todo-form">
+            <div class="field-row">
+              <input
+                type="text"
+                id="new-todo-title"
+                placeholder="Title (required)"
+                required
+              />
+            </div>
+
+            <div class="field-row">
+              <textarea
+                id="new-todo-description"
+                placeholder="Description (optional)"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="field-row horizontal">
+              <div class="field-small">
+                <label for="new-todo-due">Due</label>
+                <input type="date" id="new-todo-due" />
+              </div>
+              <div class="field-small">
+                <label for="new-todo-category">Category</label>
+                <select id="new-todo-category">
+                  <option value="all">All</option>
+                  <option value="inbox">Inbox</option>
+                  <option value="personal">Personal</option>
+                  <option value="work">Work</option>
+                  <option value="shopping">Shopping</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <button type="submit">Add</button>
+            </div>
+          </form>
+        </div>
+
+        <nav id="types-container">
+          <h2>Categories</h2>
+          <ul id="types-list"></ul>
+        </nav>
+      </aside>
+
+      <main id="main">
+        <section id="todo-list-area">
+          <div id="todo-list-container"></div>
+        </section>
+      </main>
+    </div>
+
+  </body>
+</html>
