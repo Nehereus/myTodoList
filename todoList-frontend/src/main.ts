@@ -67,10 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// window.addEventListener('load', () => startPeriodicSync(10_00));
-// window.addEventListener('beforeunload', () => stopPeriodicSync());
+window.addEventListener('load', () => startPeriodicSync(10_00));
+window.addEventListener('beforeunload', () => stopPeriodicSync());
 
-// (window as any).startPeriodicSync = startPeriodicSync;
-// (window as any).stopPeriodicSync = stopPeriodicSync;
+(window as any).startPeriodicSync = startPeriodicSync;
+(window as any).stopPeriodicSync = stopPeriodicSync;
 
 store.addRowListener('todos', null,(storeId, tableId, rowId, getCellChange) => ss.update( tableId, rowId));
