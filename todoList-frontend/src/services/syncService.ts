@@ -38,9 +38,9 @@ export const syncService = {
                 }
             }
             const response = await this.sendRequest(payload);
-            
+
             await this.processResponse(response, localChanges.pendingDeleteLocalIds);
-            store.setValue('lastSyncTimestamp', response.newSyncTimestamp); 
+            store.setValue('lastSyncTimestamp', response.newSyncTimestamp);
         } catch (e) {
             console.error("Sync failed:", e);
         } finally {
@@ -90,7 +90,7 @@ export const syncService = {
             },
             body: JSON.stringify(payload)
         }
-        const response = await fetch('${API_BASE_URL}/api/todos/sync', requestOptions);
+        const response = await fetch('http://localhost:8080/api/todos/sync', requestOptions);
 
         if (!response.ok) {
             const errorData = await response.text();
@@ -103,13 +103,11 @@ export const syncService = {
     async processResponse(response: SyncResponseDTO, pendingDeleteLocalIds: string[]) {
         store.startTransaction();
         try {
-            for(const change of response.serverChanges){
-                if(change.deleted){
-                    const t = String(indexes.getSliceRowIds('todosByServerId', String(change.id)));
-                    pendingDeleteLocalIds.push(t);
-                }
-
+            for (const change of response.serverChanges.filter(c => c.deleted)) {
+                const t = String(indexes.getSliceRowIds('todosByServerId', String(change.id)));
+                pendingDeleteLocalIds.push(t);
             }
+
             for (const localId of pendingDeleteLocalIds) {
                 if (store.hasRow('todos', localId)) {
                     store.delRow('todos', localId);
@@ -131,18 +129,16 @@ export const syncService = {
                 store.setCell('todos', localId, 'syncStatus', 'synced');
             });
 
-            if (response.serverChanges) {
-                for (const dto of response.serverChanges.filter(c=>!c.deleted)) {
-                    this.mergeServerChange(dto);
-                }
+            for (const dto of response.serverChanges.filter(c => !c.deleted)) {
+                this.mergeServerChange(dto);
             }
 
             store.finishTransaction();
 
-            if(response.serverChanges.length > 0||response.createdMappings.length > 0){
+            if (response.serverChanges.length > 0 || response.createdMappings.length > 0) {
                 renderTodoList();
             }
-            
+
         } catch (e) {
             console.error("Failed to process sync response:", e);
         }
@@ -163,8 +159,7 @@ export const syncService = {
         } as unknown as FrontendTodo;
 
         if (localId) {
-            // Item exists locally — check timestamps and merge (server wins on newer)
-            if(dto.deleted){
+            if (dto.deleted) {
                 store.delRow('todos', localId);
                 return;
             }
@@ -188,7 +183,7 @@ export const syncService = {
 
                 store.setPartialRow('todos', localId, rowValues);
             }
-        } else {
+        } else if (!dto.deleted) {
             const rowValues = {
                 localId: targetLocalId,
                 id: Number(dto.id ?? -1),
@@ -206,7 +201,6 @@ export const syncService = {
         }
     },
 
-    // --- Mappers: Convert between local/API formats ---
 
     mapTimestampToString: (ts: number | null): string | null => {
         if (ts == null || ts <= 0) return null;

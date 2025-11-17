@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.baomidou.mybatisplus.extension.ddl.DdlScriptErrorHandler.PrintlnLogErrorHandler.log;
 
 @Configuration
 @EnableWebSecurity
@@ -41,14 +40,19 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.info("Configuring security filter chain");
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless APIs
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // No sessions
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Public endpoints
+                        .requestMatchers(HttpMethod.GET,
+                                "/",          // The root path (index.html)
+                                "/index.html",
+                                "/assets/**", // Vite's JS/CSS folder
+                                "/favicon.ico",
+                                "/manifest.json"
+                        ).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        // All other endpoints
                         .requestMatchers("/api/todos/**").authenticated()
                         .anyRequest().authenticated()
                 );

@@ -52,7 +52,7 @@ export function renderTodoList() {
 
   todoIds.forEach(id => {
     const todo = store.getRow(TABLE, id);
-    if(todo.syncStatus === 'pending_delete') return;
+    if(todo.syncStatus === 'pending_delete'||todo.deleted) return;
     const todoEl = document.createElement('div');
     todoEl.className = 'todo-item';
     todoEl.setAttribute('data-id', id);
