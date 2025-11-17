@@ -1,7 +1,6 @@
-import FlexSearch, { Charset, Document, Encoder, Index,IndexedDB } from 'flexsearch';
+import { Charset, Index,IndexedDB } from 'flexsearch';
 import { store } from '../db/store';
 import type { FrontendTodo } from '../types/store';
-import type { Row } from 'tinybase';
 
 export class SearchingService {
     private index = new Index({ encoder: Charset.CJK });

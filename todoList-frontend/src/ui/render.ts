@@ -5,6 +5,13 @@ import {ss} from '../services/searchingService';
 // Layout / filter state
 const TABLE = 'todos';
 const TYPES = ['all', 'inbox', 'personal', 'work', 'shopping'];
+const TYPE_LABELS: Record<string, string> = {
+  all: '全部',
+  inbox: '收件箱',
+  personal: '个人',
+  work: '工作',
+  shopping: '购物',
+};
 let selectedCategory = 'all';
 let isSearching = false;
 let searchTerms = '';
@@ -15,7 +22,6 @@ const typesList = document.getElementById('types-list');
 
 
 export function renderTodoList() {
-   console.log('Searching for terms:', searchTerms);
   if (!listContainer) {
     console.error('List container not found');
     return;
@@ -64,16 +70,16 @@ export function renderTodoList() {
       <input type="checkbox" class="toggle" ${todo.completed ? 'checked' : ''}>
       <div class="todo-main">
         <div class="todo-header">
-          <span class="title">${todo.title}</span>
-          <span class="category">${todo.category || 'all'}</span>
+          <span class="title">${escapeHtml(String(todo.title || ''))}</span>
+          <span class="category">${TYPE_LABELS[String(todo.category ?? 'all')]}</span>
         </div>
         <div class="todo-body">
-          <div class="description">${todo.description || ''}</div>
-          <div class="due">${dueText ? `Due: ${dueText}` : ''}</div>
+          <div class="description">${escapeHtml(String(todo.description || ''))}</div>
+          <div class="due">${dueText ? `截止： ${dueText}` : ''}</div>
         </div>
       </div>
       <div class="controls">
-        <button class="edit">Edit</button>
+        <button class="edit">编辑</button>
         <button class="delete">×</button>
       </div>
     `;
@@ -133,7 +139,7 @@ function renderTypes() {
   TYPES.forEach(type => {
     const li = document.createElement('li');
     li.className = 'type' + (type === selectedCategory ? ' current' : '');
-    li.textContent = type[0].toUpperCase() + type.slice(1);
+    li.textContent = TYPE_LABELS[type];
     li.setAttribute('data-type', type);
     typesList.appendChild(li);
   });
@@ -177,12 +183,12 @@ function setupListListeners() {
           <div class="edit-row">
             <input type="date" class="edit-due" value="${toDateInput(todo.dueAt)}" />
             <select class="edit-category">
-              ${TYPES.map(t => `<option value="${t}" ${t=== (todo.category||'all') ? 'selected' : ''}>${t}</option>`).join('')}
+              ${TYPES.map(t => `<option value="${t}" ${t=== (todo.category||'all') ? 'selected' : ''}>${TYPE_LABELS[t]}</option>`).join('')}
             </select>
           </div>
           <div class="edit-actions">
-            <button class="save">Save</button>
-            <button class="cancel">Cancel</button>
+            <button class="save">保存</button>
+            <button class="cancel">取消</button>
           </div>
         </div>
       `;

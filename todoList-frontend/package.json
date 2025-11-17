@@ -13,7 +13,8 @@
     "vite": "^7.2.2"
   },
   "dependencies": {
-    "crypto": "^1.0.1",
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt-ts": "^7.1.0",
     "flexsearch": "^0.8.212",
     "tinybase": "^6.7.3"
   }

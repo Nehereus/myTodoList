@@ -9,9 +9,8 @@ import type {
     SyncResponseDTO
 } from '../types/apis';
 
-const authService = {
-    getToken: () => "DUMMY_AUTH_TOKEN" // Replace with real auth
-};
+// auth token used for sync requests. Set via `authenticate` or `setAuthToken`.
+let _authToken: string | null = null;
 
 export const syncService = {
     locked: false,
@@ -21,6 +20,12 @@ export const syncService = {
             return;
         }
         this.locked = true;
+        // If no auth token is set, do not attempt to sync with server.
+        if (!_authToken) {
+            console.info('Skipping sync: no auth token set (local mode).');
+            this.locked = false;
+            return;
+        }
         try {
             const lastSyncTimestamp = store.getValue('lastSyncTimestamp') as string;
             const localChanges = this.getLocalChanges();
@@ -33,8 +38,6 @@ export const syncService = {
                 }
             }
             const response = await this.sendRequest(payload);
-            if(response.serverChanges.length > 0)
-                console.info(response);
             
             await this.processResponse(response, localChanges.pendingDeleteLocalIds);
             store.setValue('lastSyncTimestamp', response.newSyncTimestamp); 
@@ -62,7 +65,6 @@ export const syncService = {
             const todo = store.getRow('todos', localId) as unknown as FrontendTodo;
             if (todo.id != null) { // Only update if it has a server ID
                 updates.push(this.mapToUpdateDTO(todo));
-                console.log('Queued update for todo id:', todo.id);
             }
         }
 
@@ -79,15 +81,16 @@ export const syncService = {
     },
 
     async sendRequest(payload: SyncRequestDTO): Promise<SyncResponseDTO> {
-        const token = authService.getToken();
-        const response = await fetch('http://localhost:8080/api/todos/sync', {
+        const token = _authToken;
+        const requestOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
             },
             body: JSON.stringify(payload)
-        });
+        }
+        const response = await fetch('${API_BASE_URL}/api/todos/sync', requestOptions);
 
         if (!response.ok) {
             const errorData = await response.text();
@@ -237,8 +240,10 @@ export const syncService = {
             dueAt: this.mapTimestampToString(todo.dueAt),
             createdAt: this.mapTimestampToString(todo.createdAt)!,
             updatedAt: this.mapTimestampToString(todo.updatedAt)!,
+            deleted: false,
         };
     },
+
 
     mapDtoToFrontend(dto: TodoDTO, localId: string): Omit<FrontendTodo, 'syncStatus'> {
         return {
@@ -252,6 +257,23 @@ export const syncService = {
             createdAt: this.mapStringToTimestamp(dto.createdAt)!,
             updatedAt: this.mapStringToTimestamp(dto.updatedAt)!,
         };
-    }
+    },
+
+    setAuthToken(token: string | null) {
+        _authToken = token;
+        try {
+            if (token) {
+                localStorage.setItem('authToken', token);
+            } else {
+                localStorage.removeItem('authToken');
+            }
+        } catch (e) {
+            console.warn('Failed to persist auth token to localStorage', e);
+        }
+    },
+    clearAuthToken() {
+        _authToken = null;
+        try { localStorage.removeItem('authToken'); } catch (e) { /* ignore */ }
+    },
 
 }

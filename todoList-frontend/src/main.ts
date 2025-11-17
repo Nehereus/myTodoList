@@ -4,12 +4,13 @@
 import { todoService } from './services/todoService';
 import { initializeRenderer } from './ui/render';
 import { syncService } from './services/syncService';
+import { authService } from './services/authService';
 import { store } from './db/store';
 import {ss} from './services/searchingService';
 
 let _syncIntervalId: number | null = null;
 
-export function startPeriodicSync(intervalMs = 10_00) {
+export function startPeriodicSync(intervalMs = 1_000) {
   // run an immediate sync then schedule repeating syncs
   syncService.triggerSync().catch((e) => console.error('Initial sync failed:', e));
   stopPeriodicSync();
@@ -65,12 +66,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initializeRenderer();
 
+  const authOverlay = document.getElementById('auth-overlay');
+  const signinBtn = document.getElementById('auth-signin');
+  const localBtn = document.getElementById('auth-local');
+  const usernameInput = document.getElementById('auth-username') as HTMLInputElement | null;
+  const passwordInput = document.getElementById('auth-password') as HTMLInputElement | null;
+  const authError = document.getElementById('auth-error');
+
+  function hideOverlay() {
+    if (authOverlay) authOverlay.style.display = 'none';
+  }
+
+  function showOverlay() {
+    if (authOverlay) authOverlay.style.display = 'flex';
+  }
+
+  // If there's a saved token, use it and start syncing immediately.
+  const saved = (() => { try { return localStorage.getItem('authToken'); } catch (e) { return null; } })();
+  if (saved) {
+    syncService.setAuthToken(saved);
+    hideOverlay();
+    startPeriodicSync();
+  } else {
+    showOverlay();
+  }
+
+  if (signinBtn && usernameInput && passwordInput) {
+    signinBtn.addEventListener('click', async () => {
+      const u = usernameInput.value.trim();
+      const p = passwordInput.value;
+      if (!u || !p) {
+        if (authError) authError.textContent = '请输入用户名和密码。';
+        return;
+      }
+      if (authError) authError.textContent = '';
+      const ok = await authService.authenticate(u, p);
+      if (ok) {
+        hideOverlay();
+        startPeriodicSync();
+      } else {
+        if (authError) authError.textContent = '身份验证失败。请尝试本地模式或重试。';
+      }
+    });
+  }
+
+  if (localBtn) {
+    localBtn.addEventListener('click', () => {
+      syncService.clearAuthToken();
+      hideOverlay();
+    });
+  }
+
 });
 
-window.addEventListener('load', () => startPeriodicSync(10_00));
 window.addEventListener('beforeunload', () => stopPeriodicSync());
 
 (window as any).startPeriodicSync = startPeriodicSync;
 (window as any).stopPeriodicSync = stopPeriodicSync;
 
-store.addRowListener('todos', null,(storeId, tableId, rowId, getCellChange) => ss.update( tableId, rowId));
+store.addRowListener('todos', null, (_storeId, tableId, rowId) => ss.update(tableId, rowId));

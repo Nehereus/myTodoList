@@ -1,4 +1,5 @@
 import { createStore,createIndexes} from 'tinybase';
+import type { TablesSchema } from 'tinybase';
 import { createLocalPersister} from 'tinybase/persisters/persister-browser';
 
 const SCHEMA = {
@@ -14,7 +15,7 @@ const SCHEMA = {
     updatedAt: { type: 'number', default: Date.now() },
     syncStatus: { type: 'string', default: 'pending_create' }, 
   },
-}
+} satisfies TablesSchema; 
 
 export const store = createStore().setTablesSchema(SCHEMA);
 export const indexes = createIndexes(store);
