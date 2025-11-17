@@ -1,5 +1,4 @@
-import { createStore } from 'tinybase';
-import type { FrontendTodo } from '../types/store';
+import { createStore,createIndexes} from 'tinybase';
 import { createLocalPersister} from 'tinybase/persisters/persister-browser';
 
 const SCHEMA = {
@@ -18,6 +17,19 @@ const SCHEMA = {
 }
 
 export const store = createStore().setTablesSchema(SCHEMA);
+export const indexes = createIndexes(store);
+indexes.setIndexDefinition(
+  'todosBySyncStatus',
+  'todos',            
+  'syncStatus'        
+);
+
+// Index to quickly find rows by server `id` cell (global server ID)
+indexes.setIndexDefinition(
+  'todosByServerId',
+  'todos',
+  'id'
+);
 
 const PERSIST_KEY = 'todos';
 const persister = createLocalPersister(store, PERSIST_KEY);

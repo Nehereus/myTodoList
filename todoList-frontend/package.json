@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "crypto": "^1.0.1",
+    "flexsearch": "^0.8.212",
     "tinybase": "^6.7.3"
   }
 }

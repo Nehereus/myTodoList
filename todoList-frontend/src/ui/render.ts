@@ -1,25 +1,43 @@
 import { store } from '../db/store';
 import { todoService } from '../services/todoService';
-
+import {ss} from '../services/searchingService';
 
 // Layout / filter state
+const TABLE = 'todos';
 const TYPES = ['all', 'inbox', 'personal', 'work', 'shopping'];
 let selectedCategory = 'all';
+let isSearching = false;
+let searchTerms = '';
 
 // 1. Get the container elements from the DOM
 const listContainer = document.getElementById('todo-list-container');
 const typesList = document.getElementById('types-list');
 
-function renderTodoList() {
+
+export function renderTodoList() {
+   console.log('Searching for terms:', searchTerms);
   if (!listContainer) {
     console.error('List container not found');
     return;
   }
+  
+  let todoIds;
+  if (isSearching &&searchTerms&& searchTerms.trim() !== '') {
+    
+    try {
+      todoIds = ss.search(searchTerms);
+    } catch (e) {
+      console.error('Search failed:', e);
+      todoIds = store.getRowIds(TABLE);
+    }
+  } else {
+   
+    todoIds = store.getRowIds(TABLE);
+  }
 
-  let todoIds = store.getRowIds('todos');
   if (selectedCategory !== 'all') {
     todoIds = todoIds.filter(id => {
-      const r = store.getRow('todos', id);
+      const r = store.getRow(TABLE, id);
       return r && r.category === selectedCategory;
     });
   }
@@ -27,8 +45,8 @@ function renderTodoList() {
   listContainer.innerHTML = '';
 
   todoIds.forEach(id => {
-    const todo = store.getRow('todos', id);
-
+    const todo = store.getRow(TABLE, id);
+    if(todo.syncStatus === 'pending_delete') return;
     const todoEl = document.createElement('div');
     todoEl.className = 'todo-item';
     todoEl.setAttribute('data-id', id);
@@ -64,6 +82,50 @@ function renderTodoList() {
   });
 }
 
+function setupSearchListeners() {
+  const input = document.getElementById('search-input') as HTMLInputElement | null;
+  const searchBtn = document.getElementById('search-button') as HTMLButtonElement | null;
+  const clearBtn = document.getElementById('clear-search') as HTMLButtonElement | null;
+  console.log("triggers")
+  if (searchBtn && (input || input === '')) {
+    searchBtn.addEventListener('click', () => {
+      const terms = input.value.trim();
+      if (terms) {
+        isSearching = true;
+        searchTerms = terms;
+      } else {
+        isSearching = false;
+        searchTerms = '';
+      }
+      renderTodoList();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const terms = input.value.trim();
+        if (terms) {
+          isSearching = true;
+          searchTerms = terms;
+        } else {
+          isSearching = false;
+          searchTerms = '';
+        }
+        renderTodoList();
+      }
+    });
+  }
+
+  if (clearBtn && (input || input === '')) {
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      isSearching = false;
+      searchTerms = '';
+      renderTodoList();
+    });
+  }
+}
+
 function renderTypes() {
   if (!typesList) return;
 
@@ -94,7 +156,7 @@ function setupListListeners() {
       todoService.deleteTodo(localId);
     } else if (target.matches('.edit')) {
       // Replace item with inline edit form
-      const todo = store.getRow('todos', localId);
+      const todo = store.getRow(TABLE, localId);
       if (!todo) return;
 
       // Helper to format timestamp to yyyy-mm-dd for input
@@ -184,12 +246,13 @@ export function initializeRenderer() {
     return;
   }
 
-  store.addTableListener('todos', () => {
+  store.addTableListener(TABLE, () => {
     renderTodoList();
   });
 
   setupListListeners();
   setupTypesListeners();
+  setupSearchListeners();
 
   // Render types
   renderTypes();

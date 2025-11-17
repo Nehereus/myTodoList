@@ -3,12 +3,14 @@
  *  */ 
 
 export interface FrontendTodo{
+    localId: string;
     id: number; // global id created when synchronized
     title: string;
-    description: string | null;
-    category: string|null
-    createAt: Date
-    updateAt: Date|null
-    localId: String;
-    syncStatus: 'synced' | 'pending_create' |'pending_create' | 'pending_delete';
+    description: string
+    completed: boolean;
+    category: string
+    dueAt: number|null;
+    createdAt: number
+    updatedAt: number
+    syncStatus: 'synced' | 'pending_create' |'pending_update' | 'pending_delete';
 }

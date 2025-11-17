@@ -32,6 +32,12 @@
       .edit-row .edit-category{width:140px}
       .edit-actions{display:flex;gap:8px}
       button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+      /* Search bar */
+      #search-bar{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:center;pointer-events:auto}
+      .search-inner{width:min(980px,calc(100% - 48px));display:flex;gap:8px;align-items:center;background:#fff;padding:8px;border-radius:8px;border:1px solid #e6e6ef}
+      #search-input{flex:1;padding:8px;border:1px solid #ddd;border-radius:6px}
+      #search-button{padding:8px 12px}
+      #clear-search{background:transparent;color:#666;border:none;font-size:16px;padding:6px 8px;cursor:pointer}
     </style>
     </head>
   <body>
@@ -94,6 +100,15 @@
           <div id="todo-list-container"></div>
         </section>
       </main>
+    </div>
+
+    <!-- Search bar fixed at bottom -->
+    <div id="search-bar">
+      <div class="search-inner">
+        <button id="clear-search" title="Clear search">✕</button>
+        <input id="search-input" type="text" placeholder="Search todos by title or description..." />
+        <button id="search-button">Search</button>
+      </div>
     </div>
 
   </body>

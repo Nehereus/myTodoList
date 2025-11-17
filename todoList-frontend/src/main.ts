@@ -3,6 +3,27 @@
 
 import { todoService } from './services/todoService';
 import { initializeRenderer } from './ui/render';
+import { syncService } from './services/syncService';
+import { store } from './db/store';
+import {ss} from './services/searchingService';
+
+let _syncIntervalId: number | null = null;
+
+export function startPeriodicSync(intervalMs = 10_00) {
+  // run an immediate sync then schedule repeating syncs
+  syncService.triggerSync().catch((e) => console.error('Initial sync failed:', e));
+  stopPeriodicSync();
+  _syncIntervalId = window.setInterval(() => {
+    syncService.triggerSync().catch((e) => console.error('Periodic sync failed:', e));
+  }, intervalMs);
+}
+
+export function stopPeriodicSync() {
+  if (_syncIntervalId !== null) {
+    clearInterval(_syncIntervalId);
+    _syncIntervalId = null;
+  }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   
@@ -45,3 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeRenderer();
 
 });
+
+// window.addEventListener('load', () => startPeriodicSync(10_00));
+// window.addEventListener('beforeunload', () => stopPeriodicSync());
+
+// (window as any).startPeriodicSync = startPeriodicSync;
+// (window as any).stopPeriodicSync = stopPeriodicSync;
+
+store.addRowListener('todos', null,(storeId, tableId, rowId, getCellChange) => ss.update( tableId, rowId));
