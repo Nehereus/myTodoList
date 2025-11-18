@@ -18,8 +18,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    command:
+      - --default-authentication-plugin=mysql_native_password
 
   backend:
+    image: todolist:latest
     container_name: todo-backend
     restart: always
     ports:
