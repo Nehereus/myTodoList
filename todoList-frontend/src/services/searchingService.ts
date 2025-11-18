@@ -8,13 +8,11 @@ export class SearchingService {
 
   public initialize() {
     this.index.mount(this.db);
-    console.log('Initializing FlexSearch index...');
   }
 
   public search(term: string) {
     const res = this.index.search(term, {suggest: true}) as string[];
-    res.filter(id => store.hasRow('todos', id));
-    console.log(`Search for term "${term}" returned ${res}`);
+   // console.log(`Search for term "${term}" returned ${res}`);
     return res;
   }
 
@@ -22,14 +20,12 @@ export class SearchingService {
     const todo = store.getRow(tableId, rowId) as unknown as FrontendTodo;
     if(todo.syncStatus === 'pending_delete') {
         this.index.remove(rowId);
-        console.log(`Removed todo from index: ${rowId}`);
+        //console.log(`Removed todo from index: ${rowId}`);
     }else if(this.index.contain(rowId)){
         this.index.update(rowId, this.buildDocument(todo));
     }else{
         this.index.add(rowId, this.buildDocument(todo));
-      
     }
-    this.index.commit();
   }
 
   private buildDocument(todo: FrontendTodo):string {

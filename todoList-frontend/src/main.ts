@@ -124,4 +124,5 @@ window.addEventListener('beforeunload', () => stopPeriodicSync());
 (window as any).startPeriodicSync = startPeriodicSync;
 (window as any).stopPeriodicSync = stopPeriodicSync;
 
+//ss.initialize();
 store.addRowListener('todos', null, (_storeId, tableId, rowId) => ss.update(tableId, rowId));

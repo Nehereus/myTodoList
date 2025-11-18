@@ -26,7 +26,7 @@ export const todoService = {
         syncStatus: 'pending_create'
       });
 
-      console.log('Created todo with localId:', localId);
+      //console.log('Created todo with localId:', localId);
       return true;
     } catch (e) {
       console.error('Failed to create todo', e);

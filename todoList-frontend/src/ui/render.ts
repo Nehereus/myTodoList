@@ -52,8 +52,8 @@ export function renderTodoList() {
 
   todoIds.forEach(id => {
     const todo = store.getRow(TABLE, id);
-    if(todo.syncStatus === 'pending_delete'||todo.deleted){
-      console.error('Todo marked for deletion, skipping render:', id);
+    if (!todo || todo.syncStatus === 'pending_delete' || todo.deleted) {
+      console.debug('Todo marked for deletion, skipping render:', id);
       return;
     }
       
@@ -96,7 +96,6 @@ function setupSearchListeners() {
   const input = document.getElementById('search-input') as HTMLInputElement | null;
   const searchBtn = document.getElementById('search-button') as HTMLButtonElement | null;
   const clearBtn = document.getElementById('clear-search') as HTMLButtonElement | null;
-  console.log("triggers")
   if (searchBtn && (input || input === '')) {
     searchBtn.addEventListener('click', () => {
       const terms = input.value.trim();
