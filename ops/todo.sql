@@ -2,8 +2,6 @@
 DROP TABLE IF EXISTS `todos`;
 DROP TABLE IF EXISTS `users`;
 
--- Create the 'users' table first
--- This table will store user login information.
 CREATE TABLE `users` (
                          `id` BIGINT NOT NULL AUTO_INCREMENT,
                          `username` VARCHAR(255) NOT NULL UNIQUE,
@@ -14,9 +12,6 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`username`, `hashed_password`) VALUES
 ('test', '$2y$10$6CxF/GfVf5ReFx1trN6djOXsDmsz5n7sxjoW6eBN/2MU61.NXu1oG');
 
--- Create the 'todos' table
--- This maps to your 'TodoPO' persistent object.
--- Column names use snake_case to match the mybatis-plus configuration.
 CREATE TABLE `todos` (
                          `id` BIGINT NOT NULL AUTO_INCREMENT,
                          `user_id` BIGINT NOT NULL,

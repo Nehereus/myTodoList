@@ -6,12 +6,12 @@ services:
     container_name: todo-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} # From .env file
+      MYSQL_ROOT_PASSWORD: 12345 # From .env file
       MYSQL_DATABASE: todo_db
     ports:
      - "3306:3306"
     volumes:
-      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./todo.sql:/docker-entrypoint-initdb.d/init.sql
       - db-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
@@ -22,7 +22,6 @@ services:
   backend:
     container_name: todo-backend
     restart: always
-    build: ./backend
     ports:
       - "8080:8080"
     depends_on:
@@ -31,8 +30,8 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/todo_db?useSSL=false
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ${DB_ROOT_PASSWORD}
-      APP_JWT_SECRET: ${APP_JWT_SECRET}
+      SPRING_DATASOURCE_PASSWORD: 12345
+      APP_JWT_SECRET: Y2F2ZWRvZXNpbnRlcmlvcmRpZWluc3RhbmNlYnJhaW5jb2x1bW50aXBhbmdsZWRhaWw}
       APP_JWT_EXPIRATION_MS: 86400000
 
   caddy:

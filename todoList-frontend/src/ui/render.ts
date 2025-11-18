@@ -16,7 +16,6 @@ let selectedCategory = 'all';
 let isSearching = false;
 let searchTerms = '';
 
-// 1. Get the container elements from the DOM
 const listContainer = document.getElementById('todo-list-container');
 const typesList = document.getElementById('types-list');
 
@@ -50,9 +49,14 @@ export function renderTodoList() {
   
   listContainer.innerHTML = '';
 
+
   todoIds.forEach(id => {
     const todo = store.getRow(TABLE, id);
-    if(todo.syncStatus === 'pending_delete'||todo.deleted) return;
+    if(todo.syncStatus === 'pending_delete'||todo.deleted){
+      console.error('Todo marked for deletion, skipping render:', id);
+      return;
+    }
+      
     const todoEl = document.createElement('div');
     todoEl.className = 'todo-item';
     todoEl.setAttribute('data-id', id);

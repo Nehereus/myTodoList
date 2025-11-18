@@ -13,6 +13,8 @@ export class SearchingService {
 
   public search(term: string) {
     const res = this.index.search(term, {suggest: true}) as string[];
+    res.filter(id => store.hasRow('todos', id));
+    console.log(`Search for term "${term}" returned ${res}`);
     return res;
   }
 
@@ -25,7 +27,9 @@ export class SearchingService {
         this.index.update(rowId, this.buildDocument(todo));
     }else{
         this.index.add(rowId, this.buildDocument(todo));
+      
     }
+    this.index.commit();
   }
 
   private buildDocument(todo: FrontendTodo):string {

@@ -25,7 +25,6 @@ indexes.setIndexDefinition(
   'syncStatus'        
 );
 
-// Index to quickly find rows by server `id` cell (global server ID)
 indexes.setIndexDefinition(
   'todosByServerId',
   'todos',

@@ -1,0 +1,11 @@
+todo.javacafe.dev {
+    root * /usr/share/caddy/html
+    file_server
+    handle /api/* {
+        reverse_proxy backend:8080
+    }
+
+    log {
+        output file /var/log/caddy/caddy.log
+    }
+}

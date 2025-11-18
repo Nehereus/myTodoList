@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
 @Slf4j
 public class AuthController {
     @Autowired
@@ -19,7 +18,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody AuthRequestDTO loginRequest) {
-        log.error("Authenticating user {}", loginRequest.getUsername());
+        log.info("Authenticating user {}", loginRequest.getUsername());
         AuthResponseDTO authResponse = authService.loginUser(loginRequest);
         return ResponseEntity.ok(authResponse);
     }

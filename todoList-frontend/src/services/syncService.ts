@@ -90,7 +90,7 @@ export const syncService = {
             },
             body: JSON.stringify(payload)
         }
-        const response = await fetch('http://localhost:8080/api/todos/sync', requestOptions);
+        const response = await fetch('/api/todos/sync', requestOptions);
 
         if (!response.ok) {
             const errorData = await response.text();
